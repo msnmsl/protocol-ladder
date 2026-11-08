@@ -101,7 +101,7 @@ rows.append(dict(part=1, condition="all_draws", n=len(p1),
                  spacing=float(p1["spacing"].median()), loss=float(p1["loss"].mean()),
                  sd=float(p1["loss"].std()), rho=float(r), p=float(pv)))
 
-print("\n[Part 2] same sampling frame, tight vs wide 5-point placement", flush=True)
+print("\n[Part 2] independent draws, tight vs wide 5-point placement", flush=True)
 res = {}
 for cond in ("tight", "wide"):
     out, sp = [], []

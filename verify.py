@@ -7,10 +7,11 @@ Exit code is non-zero if any check fails, so this can gate a release.
 """
 from __future__ import annotations
 
+import math
 import sys
-from pathlib import Path
 
 import pandas as pd
+from scipy import stats
 
 from paths import OUT  # honours DSTAR_OUT
 
@@ -60,8 +61,6 @@ for name, frame in [("plant", d), ("wide-range", g), ("compilation", c)]:
     check(f"{name} median paired loss", round(float(loss), 4), label)
 
 print("\n=== sampling-density manipulation (Table S4) ===")
-import math
-from scipy import stats
 s4 = pd.read_csv(OUT / "spacing_experiment.csv", encoding="utf-8-sig")
 tv = s4[s4["condition"] == "tight"].iloc[0]
 wv = s4[s4["condition"] == "wide"].iloc[0]
@@ -81,10 +80,15 @@ check("SE of difference", round(se4, 4), 0.0174, T)
 check("t statistic", round(d4 / se4, 2), 5.25, T)
 p4 = pd.read_csv(OUT / "spacing_part1_draws.csv", encoding="utf-8-sig")
 check("Part 1 draws", len(p4), 100, T)
-rho4 = float(stats.spearmanr(p4["spacing"], p4["loss"])[0])
-check("Part 1 Spearman rho", round(rho4, 3), -0.304, T)
+rho4, pv4 = stats.spearmanr(p4["spacing"], p4["loss"])
+check("Part 1 Spearman rho", round(float(rho4), 3), -0.304, T)
+check("Part 1 Spearman p", round(float(pv4), 4), 0.0021, T)
 sl4, ic4, rr4, pp4, se_r4 = stats.linregress(p4["spacing"], p4["loss"])
 check("Part 1 slope per K", round(float(sl4), 5), -0.00226, 1e-5)
+check("Part 1 R2", round(float(rr4) ** 2, 3), 0.109, T)
+check("Part 1 spacing min (K)", round(float(p4["spacing"].min()), 1), 56.9, T)
+check("Part 1 spacing max (K)", round(float(p4["spacing"].max()), 1), 91.1, T)
+check("Part 1 spacing median (K)", round(float(p4["spacing"].median()), 1), 74.4, T)
 check("Part 1 intercept", round(float(ic4), 3), 0.293, T)
 pred9 = float(ic4) + float(sl4) * 9.0
 check("extrapolated loss at 9 K", round(pred9, 3), 0.273, T)

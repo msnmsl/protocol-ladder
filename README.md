@@ -5,7 +5,7 @@ data-geometry audit of blast furnace slag viscosity models*.
 
 Twenty-two model configurations are evaluated under four validation regimes on
 three datasets. Everything the paper reports can be regenerated from the files
-here, and `python verify.py` fails the build if any of 38 quoted numbers moves.
+here, and `python verify.py` fails the build if any of its pinned checks fails.
 
 ## The ladder
 
@@ -62,18 +62,20 @@ or point `DSTAR_GPVISC_CSV` at your own copy.
 The difference is 0.0915 with SE 0.0174 and t = 5.25; a companion 100-draw
 observational sweep gives Spearman rho = -0.304 (p = 0.0021), a least-squares
 slope of -0.00226 per K and intercept 0.293 (R2 = 0.109). Draws are independent
-between conditions, so the test is two-sample rather than paired: the
-manipulation fixes the placement rule, not the identity of the compositions.
-Extrapolating that observational slope and intercept to the 9 K plant spacing
-predicts 0.273, only 36% of the plant loss 0.7644, so Table S4 supports the
-direction of the effect and not a quantitative transfer function.
+between conditions, so the test is two-sample rather than paired: the placement
+rule is the design variable, not the identity of the compositions. That
+observational slope and intercept extrapolated to the 9 K plant spacing predict
+0.273, only 36% of the plant loss 0.7644. Table S4 itself supports the direction
+of the effect; the observational sweep supplies the magnitude bound. Neither is
+a quantitative transfer function.
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
-python scripts/download_public.py --check   # verifies the public database
-python verify.py                            # 38 checks against the shipped CSVs
+python scripts/download_public.py          # fetches the public database on a fresh clone
+                                          # (--check only verifies a file already present)
+python verify.py                            # all 43 checks against the shipped CSVs
 ```
 
 ## Data
@@ -107,7 +109,7 @@ the accepted version only.
 
 ```
 paths.py                central path resolution, overridable by environment variable
-verify.py               38 checks against the shipped results
+verify.py               pinned checks against the shipped results
 scripts/
   download_public.py    fetch + checksum the public database
   run_ladder_plant.py   22 configurations × 4 tiers on the plant record

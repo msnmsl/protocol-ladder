@@ -10,8 +10,12 @@ Three datasets are involved and they are not equally available.
 SHA-256. Nothing is repackaged.
 
 ```bash
-python scripts/download_public.py --check
+python scripts/download_public.py
 ```
+
+On a fresh clone this fetches and checksums the database. `--check` only verifies
+a file that is already present: it does not download, and it exits non-zero when
+the file is missing.
 
 ## Redistributable: the literature compilation
 
