@@ -59,6 +59,23 @@ for name, frame in [("plant", d), ("wide-range", g), ("compilation", c)]:
     label = {"plant": 0.7644, "wide-range": 0.0086, "compilation": 0.7724}[name]
     check(f"{name} median paired loss", round(float(loss), 4), label)
 
+print("\n=== sampling-density manipulation (Table S4) ===")
+import math
+from scipy import stats
+s4 = pd.read_csv(OUT / "spacing_experiment.csv", encoding="utf-8-sig")
+tv = s4[s4["condition"] == "tight"].iloc[0]
+wv = s4[s4["condition"] == "wide"].iloc[0]
+check("tight paired loss", round(float(tv["loss"]), 4), 0.2100)
+check("wide paired loss", round(float(wv["loss"]), 4), 0.1185)
+d4 = float(tv["loss"]) - float(wv["loss"])
+check("tight - wide difference", round(d4, 4), 0.0915)
+se4 = math.sqrt(float(tv["sd"]) ** 2 / float(tv["n"]) + float(wv["sd"]) ** 2 / float(wv["n"]))
+check("SE of difference", round(se4, 4), 0.0174)
+check("t statistic", round(d4 / se4, 2), 5.25)
+p4 = pd.read_csv(OUT / "spacing_part1_draws.csv", encoding="utf-8-sig")
+check("Part 1 draws", len(p4), 100)
+check("Part 1 Spearman rho", round(float(stats.spearmanr(p4["spacing"], p4["loss"])[0]), 3), -0.304)
+
 print(f"\n{checked - len(fails)}/{checked} checks passed")
 if fails:
     print("FAILED:", *fails, sep="\n  ")

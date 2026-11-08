@@ -5,7 +5,7 @@ data-geometry audit of blast furnace slag viscosity models*.
 
 Twenty-two model configurations are evaluated under four validation regimes on
 three datasets. Everything the paper reports can be regenerated from the files
-here, and `python verify.py` fails the build if any of 21 quoted numbers moves.
+here, and `python verify.py` fails the build if any of 28 quoted numbers moves.
 
 ## The ladder
 
@@ -31,6 +31,7 @@ datasets, not identical**, and the paper says so in Section 2.1.
 | Wide-range database (88 rows) | `g4_gpvisc_ladder.csv` | `scripts/run_full_grid_gpvisc.py`, public data only, about 10 min |
 | Literature compilation (88 rows) | `g4_compilation_ladder.csv` | shipped; assembly script not included, see Data below |
 | One configuration with per-fold predictions | `metrics_rebuilt.csv` | `scripts/run_ladder_gpvisc.py`, about 2 min |
+| Sampling-density manipulation (Table S4) | `spacing_experiment.csv`, `spacing_part1_draws.csv` | `scripts/spacing_experiment.py`, public data only |
 
 ## Key numbers pinned by `verify.py`
 
@@ -43,12 +44,32 @@ The 89-fold contrast the paper quotes is the ratio of the first two entries in
 the first line, 0.7644 / 0.0086. The compilation is reported separately because
 its grouped rung measures extrapolation, not leakage.
 
+## Sampling-density manipulation (Table S4)
+
+`outputs/spacing_experiment.csv` and `outputs/spacing_part1_draws.csv` back the
+controlled check quoted in Section 1.3 and tabulated as Table S4 of the
+Supplementary Information. Regenerate both with
+`python scripts/spacing_experiment.py` (public data only, a few minutes).
+
+| Condition | Placement of the five points | Spacing (K) | Repeats | Paired loss | sd |
+|---|---|---|---|---|---|
+| tight | consecutive | 32.0 | 30 | 0.2100 | 0.0849 |
+| wide | quantile-spaced | 79.5 | 30 | 0.1185 | 0.0435 |
+
+The difference is 0.0915 with SE 0.0174 and t = 5.25; a companion 100-draw
+observational sweep gives Spearman rho = -0.304 (p = 0.0021). Draws are
+independent between conditions, so the test is two-sample rather than paired:
+the manipulation fixes the placement rule, not the identity of the compositions.
+Extrapolating the observed slope to the 9 K plant spacing predicts 0.273, only
+36% of the plant loss 0.7644, so Table S4 supports the direction of the effect
+and not a quantitative transfer function.
+
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 python scripts/download_public.py --check   # verifies the public database
-python verify.py                            # 21 checks against the shipped CSVs
+python verify.py                            # 28 checks against the shipped CSVs
 ```
 
 ## Data
@@ -90,7 +111,9 @@ scripts/
   run_ladder_gpvisc.py  one configuration, with per-fold predictions
   res_common.py         shared loading and metrics
   make_figures_resolution.py
+  spacing_experiment.py  sampling-density manipulation (Table S4)
 outputs/                per-configuration results
+                        spacing_experiment.csv, spacing_part1_draws.csv
 data/schema/            expected schema of the plant record
 ```
 
