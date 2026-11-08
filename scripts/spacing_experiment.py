@@ -3,8 +3,11 @@
 
 Part 1 is observational: 100 random draws of 40 compositions x 5 temperature
 points, regressing the paired loss on realised within-composition spacing.
-Part 2 is the controlled comparison: 30 independent draws per condition, with
-only the placement of the five points changed (consecutive vs quantile-spaced).
+Part 2 is the controlled comparison: 30 independent draws per condition. The
+two conditions apply different placement rules (consecutive vs quantile-spaced)
+to independently drawn compositions, so the comparison is two-sample rather
+than paired: the placement rule is the design variable, not the identity of
+the compositions drawn.
 
 Needs only the public gpvisc CSV. Set DSTAR_GPVISC_CSV to relocate it and
 DSTAR_OUT to redirect the two output files.

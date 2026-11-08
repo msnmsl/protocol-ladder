@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-OUT = Path(__file__).resolve().parent / "outputs"
+from paths import OUT  # honours DSTAR_OUT
 
 fails: list[str] = []
 checked = 0
@@ -65,16 +65,30 @@ from scipy import stats
 s4 = pd.read_csv(OUT / "spacing_experiment.csv", encoding="utf-8-sig")
 tv = s4[s4["condition"] == "tight"].iloc[0]
 wv = s4[s4["condition"] == "wide"].iloc[0]
-check("tight paired loss", round(float(tv["loss"]), 4), 0.2100)
-check("wide paired loss", round(float(wv["loss"]), 4), 0.1185)
+T = 1e-4  # tighter than the default for four-decimal values
+check("tight realised spacing (K)", round(float(tv["spacing"]), 1), 32.0, T)
+check("wide realised spacing (K)", round(float(wv["spacing"]), 1), 79.5, T)
+check("tight repeats", int(tv["n"]), 30, T)
+check("wide repeats", int(wv["n"]), 30, T)
+check("tight paired loss", round(float(tv["loss"]), 4), 0.2100, T)
+check("wide paired loss", round(float(wv["loss"]), 4), 0.1185, T)
+check("tight sd", round(float(tv["sd"]), 4), 0.0849, T)
+check("wide sd", round(float(wv["sd"]), 4), 0.0435, T)
 d4 = float(tv["loss"]) - float(wv["loss"])
-check("tight - wide difference", round(d4, 4), 0.0915)
+check("tight - wide difference", round(d4, 4), 0.0915, T)
 se4 = math.sqrt(float(tv["sd"]) ** 2 / float(tv["n"]) + float(wv["sd"]) ** 2 / float(wv["n"]))
-check("SE of difference", round(se4, 4), 0.0174)
-check("t statistic", round(d4 / se4, 2), 5.25)
+check("SE of difference", round(se4, 4), 0.0174, T)
+check("t statistic", round(d4 / se4, 2), 5.25, T)
 p4 = pd.read_csv(OUT / "spacing_part1_draws.csv", encoding="utf-8-sig")
-check("Part 1 draws", len(p4), 100)
-check("Part 1 Spearman rho", round(float(stats.spearmanr(p4["spacing"], p4["loss"])[0]), 3), -0.304)
+check("Part 1 draws", len(p4), 100, T)
+rho4 = float(stats.spearmanr(p4["spacing"], p4["loss"])[0])
+check("Part 1 Spearman rho", round(rho4, 3), -0.304, T)
+sl4, ic4, rr4, pp4, se_r4 = stats.linregress(p4["spacing"], p4["loss"])
+check("Part 1 slope per K", round(float(sl4), 5), -0.00226, 1e-5)
+check("Part 1 intercept", round(float(ic4), 3), 0.293, T)
+pred9 = float(ic4) + float(sl4) * 9.0
+check("extrapolated loss at 9 K", round(pred9, 3), 0.273, T)
+check("share of plant loss 0.7644", round(pred9 / 0.7644, 2), 0.36, T)
 
 print(f"\n{checked - len(fails)}/{checked} checks passed")
 if fails:

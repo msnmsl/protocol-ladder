@@ -5,7 +5,7 @@ data-geometry audit of blast furnace slag viscosity models*.
 
 Twenty-two model configurations are evaluated under four validation regimes on
 three datasets. Everything the paper reports can be regenerated from the files
-here, and `python verify.py` fails the build if any of 28 quoted numbers moves.
+here, and `python verify.py` fails the build if any of 38 quoted numbers moves.
 
 ## The ladder
 
@@ -50,6 +50,9 @@ its grouped rung measures extrapolation, not leakage.
 controlled check quoted in Section 1.3 and tabulated as Table S4 of the
 Supplementary Information. Regenerate both with
 `python scripts/spacing_experiment.py` (public data only, a few minutes).
+It reads `paths.GPVISC_CSV`; on a fresh clone run `python scripts/download_public.py`
+**without** `--check` first (that flag only verifies a file that is already there),
+or point `DSTAR_GPVISC_CSV` at your own copy.
 
 | Condition | Placement of the five points | Spacing (K) | Repeats | Paired loss | sd |
 |---|---|---|---|---|---|
@@ -57,19 +60,20 @@ Supplementary Information. Regenerate both with
 | wide | quantile-spaced | 79.5 | 30 | 0.1185 | 0.0435 |
 
 The difference is 0.0915 with SE 0.0174 and t = 5.25; a companion 100-draw
-observational sweep gives Spearman rho = -0.304 (p = 0.0021). Draws are
-independent between conditions, so the test is two-sample rather than paired:
-the manipulation fixes the placement rule, not the identity of the compositions.
-Extrapolating the observed slope to the 9 K plant spacing predicts 0.273, only
-36% of the plant loss 0.7644, so Table S4 supports the direction of the effect
-and not a quantitative transfer function.
+observational sweep gives Spearman rho = -0.304 (p = 0.0021), a least-squares
+slope of -0.00226 per K and intercept 0.293 (R2 = 0.109). Draws are independent
+between conditions, so the test is two-sample rather than paired: the
+manipulation fixes the placement rule, not the identity of the compositions.
+Extrapolating that observational slope and intercept to the 9 K plant spacing
+predicts 0.273, only 36% of the plant loss 0.7644, so Table S4 supports the
+direction of the effect and not a quantitative transfer function.
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 python scripts/download_public.py --check   # verifies the public database
-python verify.py                            # 28 checks against the shipped CSVs
+python verify.py                            # 38 checks against the shipped CSVs
 ```
 
 ## Data
@@ -103,7 +107,7 @@ the accepted version only.
 
 ```
 paths.py                central path resolution, overridable by environment variable
-verify.py               21 checks against the shipped results
+verify.py               38 checks against the shipped results
 scripts/
   download_public.py    fetch + checksum the public database
   run_ladder_plant.py   22 configurations × 4 tiers on the plant record
